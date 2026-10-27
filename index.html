@@ -33,7 +33,7 @@
         </div>
         <div class="data-time">
           <span>数据更新时间：</span>
-          <b id="updateTime">2026-09-23 10:42</b>
+          <b id="updateTime">2026-10-27 10:42</b>
           <button id="refreshButton" type="button" aria-label="刷新数据"><svg><use href="#i-refresh"></use></svg></button>
         </div>
       </header>
@@ -45,7 +45,7 @@
             <div class="character" aria-hidden="true">👨🏻‍💼</div>
             <div class="greeting-copy">
               <h1>王晨，上午好～ <span>今日事，今日毕，客户服务不掉队！</span></h1>
-              <p>今天共有 18 项必清及时限任务，建议优先处理 14 项超时或异常任务。</p>
+              <p>今天共有 29 项必清及时限任务，其中 6 项将在 1 小时内超时，请优先处理。</p>
             </div>
             <div class="profile-summary">
               <div><span>司龄</span><strong>3.2年</strong></div>
@@ -71,17 +71,14 @@
           <header class="smart-header unified-header">
             <div class="board-title">
               <span class="title-icon"><svg><use href="#i-task"></use></svg></span>
-              <div><h2>工作任务预警</h2><p>数据更新时间：<b>10:42</b>　统一汇总客户管理、拜访跟进及常规任务</p></div>
+              <div><h2>看日清</h2><p>数据更新时间：<b>10:42</b>　聚合今天必须闭环、已经超时和后续待办的全部任务</p></div>
             </div>
             <div class="smart-tabs task-tabs" id="taskTabs">
               <button class="active" type="button" data-view="today"><span>今日必清</span><b>18</b></button>
               <button type="button" data-view="overdue"><span>超时任务</span><b>9</b></button>
               <button type="button" data-view="later"><span>后续待清</span><b>13</b></button>
-              <button type="button" data-view="exception"><span>异常任务</span><b>5</b></button>
-              <button type="button" data-view="warehouse"><span>搬仓任务</span><b>4</b></button>
-              <button type="button" data-view="blocked"><span>异常卡单</span><b>2</b></button>
             </div>
-            <div class="rate-block"><span>需优先处理</span><strong id="priorityCount">14 项</strong></div>
+            <div class="rate-block"><span>今日任务</span><strong id="priorityCount">29 项</strong></div>
           </header>
 
           <div class="stage-card-strip task-card-strip" id="taskCardStrip" role="listbox" aria-label="工作任务预警业务类型" aria-live="polite"></div>
@@ -90,6 +87,81 @@
             <header><div><span>智能提醒</span><h3 id="focusTitle">当日必清交接：当前有 6 项待处理</h3><p id="focusRule">统计口径：交接审批通过后，剩余交接天数为 0 且未完成的任务</p></div><button id="focusAllButton" type="button">查看全部 6 项 ›</button></header>
             <div class="focus-list" id="focusList"></div>
           </div>
+        </section>
+
+        <section class="dashboard-board result-board">
+          <header class="result-title">
+            <div class="result-heading">
+              <span class="result-title-icon">结</span>
+              <div><h2>看结果</h2><p>收入结果、客户结构与经营质量</p></div>
+            </div>
+            <div class="result-filters" aria-label="结果筛选条件">
+              <button type="button" data-toast="组织范围筛选将在数据接入后开放"><small>组织范围</small><b>我的客户</b><i>⌄</i></button>
+              <button type="button" data-toast="统计周期筛选将在数据接入后开放"><small>统计周期</small><b>2026年10月 · MTD</b><i>⌄</i></button>
+            </div>
+          </header>
+
+          <section class="result-reminder" aria-labelledby="resultReminderTitle">
+            <header><span>AI</span><b id="resultReminderTitle">智能提醒</b></header>
+            <div>
+              <p><i></i>收入进度：当月累计收入 <b>271.9万元</b>，请注意目标差额 <b>42.8万元</b></p>
+              <p><i></i>增长抓手：新签收入同比增长 <b class="positive">18.6%</b>，可继续提升 AB 客户贡献</p>
+              <p><i></i>销售过程：全量客户收入同比增长 <b class="positive">8.7%</b>，当前达成率 <b>86.4%</b></p>
+              <p><i></i>经营风险：收入流失率 <b class="negative">4.6%</b>，高于目标 0.6pp，请及时跟进</p>
+            </div>
+          </section>
+
+          <section class="result-income" aria-labelledby="incomeProgressTitle">
+            <header><h3 id="incomeProgressTitle">收入进度</h3><span>月度达成率排名　<b>8 / 36</b></span></header>
+            <div class="income-cockpit">
+              <article class="income-progress">
+                <div class="income-big">
+                  <div><strong>271.9<small>万</small></strong><span>当月累计收入 ⓘ</span><p>同比 <b class="positive">8.7% ▲</b></p></div>
+                  <div><strong>314.7<small>万</small></strong><span>当月目标收入 ⓘ</span><p>目标差额 <b class="negative">42.8万</b></p></div>
+                </div>
+                <div class="income-split" aria-label="全量客户收入构成"><i title="AB收入 184.8万"></i><b title="CDE收入 87.1万"></b></div>
+                <div class="income-split-label"><span>AB 收入 184.8万</span><span>CDE 收入 87.1万</span></div>
+                <div class="income-rate"><span>收入进度 <b>86.4%</b></span><div><i style="width:86.4%"></i></div></div>
+                <div class="income-rate time"><span>时间进度 <b>87.1%</b></span><div><i style="width:87.1%"></i></div></div>
+              </article>
+
+              <article class="income-trend" aria-label="当月总收入、新签收入和保有收入趋势">
+                <svg viewBox="0 0 620 190" preserveAspectRatio="none" role="img" aria-label="10月1日至31日收入趋势图">
+                  <defs><linearGradient id="resultFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#355b9e" stop-opacity=".24"/><stop offset="1" stop-color="#355b9e" stop-opacity=".02"/></linearGradient></defs>
+                  <g class="result-grid"><line x1="0" y1="20" x2="620" y2="20"/><line x1="0" y1="60" x2="620" y2="60"/><line x1="0" y1="100" x2="620" y2="100"/><line x1="0" y1="140" x2="620" y2="140"/><line x1="0" y1="180" x2="620" y2="180"/></g>
+                  <path class="result-area" d="M0 166 C20 171 35 177 55 173 S80 160 100 159 S126 168 145 165 S165 126 180 103 S205 91 220 104 S240 135 250 151 S268 171 282 156 S300 113 320 105 S345 107 360 93 S378 41 390 44 S402 93 420 96 S442 88 455 101 S475 159 500 162 S530 154 548 151 S570 174 620 176 L620 180 L0 180 Z"/>
+                  <path class="result-total" d="M0 166 C20 171 35 177 55 173 S80 160 100 159 S126 168 145 165 S165 126 180 103 S205 91 220 104 S240 135 250 151 S268 171 282 156 S300 113 320 105 S345 107 360 93 S378 41 390 44 S402 93 420 96 S442 88 455 101 S475 159 500 162 S530 154 548 151 S570 174 620 176"/>
+                  <path class="result-new" d="M0 179 C100 178 140 178 175 176 S220 176 248 175 S270 155 286 173 S315 179 340 176 S365 176 378 160 S396 177 420 176 S455 178 620 179"/>
+                  <path class="result-retain" d="M0 177 C90 178 160 176 220 177 S280 175 345 176 S400 174 460 177 S540 176 620 177"/>
+                </svg>
+                <div class="trend-y" aria-hidden="true"><span>300</span><span>225</span><span>150</span><span>75</span><span>0</span></div>
+                <div class="trend-x" aria-hidden="true"><span>1日</span><span>5日</span><span>10日</span><span>15日</span><span>20日</span><span>25日</span><span>27日</span><span>31日</span></div>
+                <footer><span><i class="total-dot"></i>总收入</span><span><i class="new-dot"></i>新签收入</span><span><i class="retain-dot"></i>保有收入</span></footer>
+              </article>
+
+              <article class="income-side">
+                <h3>新签收入</h3>
+                <strong>53.3<small>万</small></strong><span>新签客户 MTD 收入 ⓘ</span><p>同比 <b class="positive">18.6% ▲</b></p>
+                <hr><div><strong>27.4<small>万</small></strong><span>新签 AB 收入</span></div><div><strong>25.9<small>万</small></strong><span>新签 CDE 收入</span></div>
+              </article>
+
+              <article class="income-side">
+                <h3>保有收入</h3>
+                <strong>218.6<small>万</small></strong><span>保有客户 MTD 收入 ⓘ</span><p>同比 <b class="positive">6.2% ▲</b></p>
+                <hr><div><strong>157.4<small>万</small></strong><span>保有 AB 收入</span></div><div><strong>61.2<small>万</small></strong><span>保有 CDE 收入</span></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="result-quality" aria-labelledby="resultQualityTitle">
+            <header><div><h3 id="resultQualityTitle">客户经营质量</h3><p>流失率越低越好，留存率越高越好</p></div><button type="button" data-toast="正在查看客户经营质量明细">查看客户明细 ›</button></header>
+            <div>
+              <article><span>客户流失率</span><strong>3.8%</strong><p>目标 ≤ 3.2%　<b class="positive">环比 ↓0.7pp</b></p><i class="risk" style="width:63%"></i></article>
+              <article><span>收入流失率</span><strong>4.6%</strong><p>目标 ≤ 4.0%　<b class="negative">环比 ↑0.3pp</b></p><i class="risk" style="width:74%"></i></article>
+              <article><span>上月新签客户留存率</span><strong>82.4%</strong><p>活跃客户 28 / 新签客户 34</p><i class="healthy" style="width:82.4%"></i></article>
+              <article><span>上月新签收入留存率</span><strong>88.7%</strong><p>留存收入 46.9万元　<b class="positive">↑4.6pp</b></p><i class="healthy" style="width:88.7%"></i></article>
+            </div>
+          </section>
         </section>
       </main>
     </div>

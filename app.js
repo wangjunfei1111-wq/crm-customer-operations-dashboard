@@ -14,6 +14,7 @@ let activeDrawerKey = "handoverToday";
 let activeFocusKey = "handoverToday";
 let activeTaskView = "today";
 let activeTaskType = "handover";
+const activeVisitSegments = {};
 let toastTimer;
 
 const alertDetails = {
@@ -170,27 +171,23 @@ const alertDetails = {
   visitToday: {
     category: "拜访及跟进预警",
     title: "今日需拜访",
-    count: 5,
+    count: 8,
     countLabel: "今日待拜访",
-    deadlineLabel: "统一截止",
-    deadline: "今天 17:00",
-    status: "常规",
+    deadlineLabel: "最近截止",
+    deadline: "今天 15:30",
+    status: "今日待办",
     tone: "neutral",
-    criteria: "统计截止时间为任务创建后第 1 个工作日 17:00 的待拜访任务。",
-    display: "常规黑色展示。",
-    interaction: "进入拜访任务待办页，自动筛选未反馈清单。",
-    special: "周末下发的任务周一统一清零补做。",
+    criteria: "汇总今日待处理的流失减量拜访与常规拜访；前者须在今日 17:00 前完成，后者须在各自计划拜访时间前完成。",
+    display: "总数聚合展示，并按“流失减量拜访 / 常规拜访”拆分数量。",
+    interaction: "可按拜访类型筛选任务，并进入对应拜访待办页完成反馈。",
+    special: "流失减量拜访取前一工作日创建的 AI 推荐任务，周一包含上周五；常规拜访按计划拜访时间判断。",
     source: "拜访任务系统",
     actionLabel: "进入今日拜访待办",
     actionKind: "navigate",
     actionToast: "已带入“今日需拜访 + 未反馈”条件打开待办页",
     emptyText: "暂无今日需拜访任务",
     itemAction: "去反馈",
-    items: [
-      { title: "宏远集团", description: "线下拜访，推进数字化营销平台升级项目。", time: "今天 14:00", tag: "待反馈", fields: [["任务创建", "09-22 10:20"], ["截止时间", "09-23 17:00"], ["负责人", "王晨"]] },
-      { title: "华辰数据", description: "线上回访，确认报价和采购排期。", time: "今天 15:30", tag: "商机跟进", fields: [["任务创建", "09-22 11:15"], ["截止时间", "09-23 17:00"], ["负责人", "王晨"]] },
-      { title: "启明医药", description: "客户成功回访，核对产品使用情况。", time: "今天 17:00", tag: "服务回访", fields: [["任务创建", "09-22 15:40"], ["截止时间", "09-23 17:00"], ["负责人", "王晨"]] }
-    ]
+    items: []
   },
   visitOvertime: {
     category: "拜访及跟进预警",
@@ -201,19 +198,114 @@ const alertDetails = {
     deadline: "3 天",
     status: "已超时",
     tone: "overdue",
-    criteria: "统计当前时间晚于任务创建后第 1 个工作日 17:00，且仍未反馈的拜访任务。",
-    display: "红色数值，并展示“已超时”标签。",
-    interaction: "进入超时拜访明细并展示精确超时时长。",
-    special: "已作废任务不纳入统计。",
+    criteria: "汇总已超时的流失减量拜访与常规拜访；分别按今日 17:00 和计划拜访时间判断是否超时。",
+    display: "红色数值聚合展示，并按两类拜访拆分超时数量。",
+    interaction: "可按拜访类型筛选超时任务，并进入对应明细立即处理。",
+    special: "已完成或已作废任务不纳入统计；超时状态显示已过期天数。",
     source: "拜访任务系统",
     actionLabel: "进入超时拜访明细",
     actionKind: "navigate",
     actionToast: "正在打开超时未拜访明细",
     emptyText: "暂无超时未拜访任务",
     itemAction: "去反馈",
+    items: []
+  },
+  visitLossToday: {
+    category: "拜访及跟进预警",
+    title: "今日流失减量拜访",
+    count: 3,
+    countLabel: "今日待拜访",
+    deadlineLabel: "统一截止",
+    deadline: "今天 17:00",
+    status: "今日待办",
+    tone: "neutral",
+    criteria: "统计 AI 推荐、创建时间为前一工作日（周一包含上周五）、当前时间不晚于 17:00 且尚未拜访的流失减量任务。",
+    display: "在今日需拜访中标记为“流失减量拜访”，不足 1 小时显示剩余分钟。",
+    interaction: "进入流失减量拜访待办页，并自动筛选今日未完成任务。",
+    special: "今日 17:00 后仍未完成时转入超时未拜访。",
+    source: "AI 推荐拜访任务",
+    actionLabel: "进入流失减量拜访待办",
+    actionKind: "navigate",
+    actionToast: "正在打开今日流失减量拜访待办",
+    emptyText: "暂无今日流失减量拜访任务",
+    itemAction: "去拜访",
     items: [
-      { title: "远景智造", description: "原定拜访未执行，尚未补充反馈或重新排期。", time: "超时 3 天 2 小时", tag: "已超时", tagTone: "overdue", fields: [["任务创建", "09-17 09:10"], ["应完成", "09-18 17:00"], ["负责人", "王晨"]] },
-      { title: "嘉辰物流", description: "关键联系人变更后的首次拜访仍未完成。", time: "超时 1 天 4 小时", tag: "已超时", tagTone: "overdue", fields: [["任务创建", "09-18 14:30"], ["应完成", "09-21 17:00"], ["负责人", "王晨"]] }
+      { visitKind: "流失减量拜访", detailKey: "visitLossToday", title: "宏远集团", description: "线下拜访，推进客户流失挽回。", time: "剩余 45 分钟", tag: "AI 推荐", tagTone: "warning", fields: [["推荐来源", "AI 流失预警"], ["截止时间", "10-27 17:00"], ["负责人", "王晨"]] },
+      { visitKind: "流失减量拜访", detailKey: "visitLossToday", title: "启明医药", description: "线上拜访，核实近期减量原因与恢复计划。", time: "今天 17:00", tag: "AI 推荐", fields: [["推荐来源", "AI 减量预警"], ["截止时间", "10-27 17:00"], ["负责人", "王晨"]] },
+      { visitKind: "流失减量拜访", detailKey: "visitLossToday", title: "海越食品", description: "线下拜访，确认订单下降原因与客户挽回方案。", time: "今天 17:00", tag: "AI 推荐", fields: [["推荐来源", "AI 流失预警"], ["截止时间", "10-27 17:00"], ["负责人", "王晨"]] }
+    ]
+  },
+  visitRegularToday: {
+    category: "拜访及跟进预警",
+    title: "今日常规拜访",
+    count: 5,
+    countLabel: "今日待拜访",
+    deadlineLabel: "最近计划时间",
+    deadline: "今天 15:30",
+    status: "今日待办",
+    tone: "neutral",
+    criteria: "统计省区、总部手动下发等其他拜访任务，当前时间不晚于计划拜访时间且尚未拜访。",
+    display: "在今日需拜访中标记为“常规拜访”，并展示计划拜访时间。",
+    interaction: "进入常规拜访待办页，并保留计划时间与未完成筛选条件。",
+    special: "超过计划拜访时间仍未完成时转入超时未拜访。",
+    source: "拜访任务系统",
+    actionLabel: "进入常规拜访待办",
+    actionKind: "navigate",
+    actionToast: "正在打开今日常规拜访待办",
+    emptyText: "暂无今日常规拜访任务",
+    itemAction: "去拜访",
+    items: [
+      { visitKind: "常规拜访", detailKey: "visitRegularToday", title: "华辰数据", description: "线上拜访，确认报价与采购排期。", time: "今天 15:30", tag: "省区下发", fields: [["下发来源", "华东省区"], ["计划拜访", "10-27 15:30"], ["负责人", "王晨"]] },
+      { visitKind: "常规拜访", detailKey: "visitRegularToday", title: "嘉辰物流", description: "线下拜访，确认关键联系人变更后的合作安排。", time: "今天 16:20", tag: "总部下发", fields: [["下发来源", "总部客户组"], ["计划拜访", "10-27 16:20"], ["负责人", "王晨"]] },
+      { visitKind: "常规拜访", detailKey: "visitRegularToday", title: "博源制造", description: "线上拜访，沟通年度服务方案与增购需求。", time: "今天 16:40", tag: "省区下发", fields: [["下发来源", "华北省区"], ["计划拜访", "10-27 16:40"], ["负责人", "王晨"]] },
+      { visitKind: "常规拜访", detailKey: "visitRegularToday", title: "星辰教育", description: "线下拜访，复盘产品使用情况与后续培训计划。", time: "今天 17:10", tag: "手动创建", fields: [["下发来源", "客户经理"], ["计划拜访", "10-27 17:10"], ["负责人", "王晨"]] },
+      { visitKind: "常规拜访", detailKey: "visitRegularToday", title: "恒达能源", description: "线上拜访，确认续签前的服务改进事项。", time: "今天 18:00", tag: "总部下发", fields: [["下发来源", "总部客户组"], ["计划拜访", "10-27 18:00"], ["负责人", "王晨"]] }
+    ]
+  },
+  visitLossOvertime: {
+    category: "拜访及跟进预警",
+    title: "超时流失减量拜访",
+    count: 1,
+    countLabel: "超时任务",
+    deadlineLabel: "最长过期",
+    deadline: "3 天",
+    status: "已超时",
+    tone: "overdue",
+    criteria: "统计 AI 推荐且已超过任务应完成日 17:00、仍未拜访的流失减量任务。",
+    display: "红色预警，摘要标记“流失减量拜访”，状态显示已过期天数。",
+    interaction: "进入超时流失减量拜访明细并立即补充拜访反馈。",
+    special: "已完成或已作废任务实时剔除。",
+    source: "AI 推荐拜访任务",
+    actionLabel: "进入超时流失减量拜访",
+    actionKind: "navigate",
+    actionToast: "正在打开超时流失减量拜访明细",
+    emptyText: "暂无超时流失减量拜访任务",
+    itemAction: "立即处理",
+    items: [
+      { visitKind: "流失减量拜访", detailKey: "visitLossOvertime", title: "远景智造", description: "线下拜访，核实客户持续减量原因与挽回动作。", time: "已过期3天", tag: "AI 推荐", tagTone: "overdue", fields: [["推荐来源", "AI 减量预警"], ["应完成", "10-24 17:00"], ["负责人", "王晨"]] }
+    ]
+  },
+  visitRegularOvertime: {
+    category: "拜访及跟进预警",
+    title: "超时常规拜访",
+    count: 1,
+    countLabel: "超时任务",
+    deadlineLabel: "最长过期",
+    deadline: "1 天",
+    status: "已超时",
+    tone: "overdue",
+    criteria: "统计当前时间已超过计划拜访时间、仍未完成的省区或总部手动下发等常规拜访任务。",
+    display: "红色预警，摘要标记“常规拜访”，状态显示已过期天数。",
+    interaction: "进入超时常规拜访明细并立即补充拜访反馈。",
+    special: "已完成或已作废任务实时剔除。",
+    source: "拜访任务系统",
+    actionLabel: "进入超时常规拜访",
+    actionKind: "navigate",
+    actionToast: "正在打开超时常规拜访明细",
+    emptyText: "暂无超时常规拜访任务",
+    itemAction: "立即处理",
+    items: [
+      { visitKind: "常规拜访", detailKey: "visitRegularOvertime", title: "嘉辰物流", description: "线下拜访，完成关键联系人变更后的首次沟通。", time: "已过期1天", tag: "总部下发", tagTone: "overdue", fields: [["下发来源", "总部客户组"], ["计划拜访", "10-26 14:30"], ["负责人", "王晨"]] }
     ]
   },
   approvalToday: {
@@ -363,20 +455,82 @@ const alertDetails = {
       { title: "嘉辰物流数据校验", description: "客户主数据校验失败，等待数据管理员处理。", time: "卡单 26 小时", tag: "系统异常", tagTone: "warning", fields: [["生成时间", "09-22 09:10"], ["阻塞节点", "主数据校验"], ["处理进度", "待数据组"]] },
       { title: "数联科技跨区转交", description: "跨区域归属存在争议，等待业务主管确认。", time: "卡单 11 小时", tag: "协同阻塞", tagTone: "warning", fields: [["生成时间", "09-23 00:20"], ["阻塞节点", "归属确认"], ["处理进度", "协同中"]] }
     ]
+  },
+  tcExceptionToday: {
+    category: "常规任务跟进预警",
+    title: "当日必清 TC 入库异常",
+    count: 3,
+    countLabel: "今日待清",
+    deadlineLabel: "最近截止",
+    deadline: "今天 15:20",
+    status: "当日必清",
+    tone: "warning",
+    criteria: "统计创建时间在 7 天内、尚未完成的 TC 入库异常任务。",
+    display: "按今日处理时限展示，完成后实时从指标中剔除。",
+    interaction: "进入 TC 入库异常任务清单并自动筛选当前客户经理。",
+    special: "仅统计有效且未关闭的任务。",
+    source: "TC 入库异常任务系统",
+    actionLabel: "进入 TC 异常清单",
+    actionKind: "navigate",
+    actionToast: "正在打开 TC 入库异常任务清单",
+    emptyText: "暂无 TC 入库异常任务",
+    itemAction: "去处理",
+    items: [
+      { title: "华东云仓入库资料异常", description: "入库单与客户合同信息不一致，待补充核验。", time: "今天 15:20", tag: "资料异常", tagTone: "warning", fields: [["创建时间", "10-25 14:10"], ["异常类型", "资料不一致"], ["责任人", "王晨"]] },
+      { title: "盛达供应链入库编码缺失", description: "客户商品编码未同步，待完成基础信息维护。", time: "今天 16:00", tag: "编码缺失", tagTone: "warning", fields: [["创建时间", "10-26 09:30"], ["异常类型", "编码缺失"], ["责任人", "王晨"]] },
+      { title: "远洋商贸入库状态异常", description: "系统状态未回传，需协同仓配团队确认。", time: "今天 17:00", tag: "状态异常", tagTone: "warning", fields: [["创建时间", "10-26 11:12"], ["异常类型", "状态未回传"], ["责任人", "王晨"]] }
+    ]
+  },
+  accidentWarningToday: {
+    category: "常规任务跟进预警",
+    title: "当日必清一级事故预警",
+    count: 2,
+    countLabel: "今日待清",
+    deadlineLabel: "处理时限",
+    deadline: "48 小时内",
+    status: "高优先级",
+    tone: "critical",
+    criteria: "统计体验事故预警系统推送后 48 小时内，需要客户经理完成跟进的一级事故预警。",
+    display: "使用红色高优先级标识，并置于今日必清业务中。",
+    interaction: "进入事故预警详情查看损伤原因、客户影响及跟进记录。",
+    special: "预警解除或完成闭环后实时剔除。",
+    source: "体验事故预警系统",
+    actionLabel: "进入事故预警清单",
+    actionKind: "navigate",
+    actionToast: "正在打开一级事故预警清单",
+    emptyText: "暂无一级事故预警任务",
+    itemAction: "去跟进",
+    items: [
+      { title: "恒远科技履约体验预警", description: "客户履约体验出现重度损伤，待确认影响范围并制定恢复方案。", time: "剩余 6 小时", tag: "一级事故", tagTone: "critical", fields: [["推送时间", "10-26 16:20"], ["损伤等级", "重度损伤"], ["责任人", "王晨"]] },
+      { title: "新创零售服务异常预警", description: "连续两周服务指标下降，需完成客户沟通与事故跟进。", time: "剩余 19 小时", tag: "一级事故", tagTone: "critical", fields: [["推送时间", "10-27 05:40"], ["损伤等级", "重度损伤"], ["责任人", "王晨"]] }
+    ]
   }
 };
+
+function syncVisitAggregates() {
+  alertDetails.visitToday.items = alertDetails.visitLossToday.items.concat(alertDetails.visitRegularToday.items);
+  alertDetails.visitOvertime.items = alertDetails.visitLossOvertime.items.concat(alertDetails.visitRegularOvertime.items);
+  alertDetails.visitToday.count = alertDetails.visitLossToday.count + alertDetails.visitRegularToday.count;
+  alertDetails.visitOvertime.count = alertDetails.visitLossOvertime.count + alertDetails.visitRegularOvertime.count;
+  alertDetails.visitToday.deadline = alertDetails.visitRegularToday.count ? "今天 15:30" : (alertDetails.visitLossToday.count ? "今天 17:00" : "暂无");
+}
+
+syncVisitAggregates();
 
 const taskViews = {
   today: [
     { type: "handover", key: "handoverToday", label: "交接", sourceClass: "source-customer", sourceLabel: "客户管理", cardClass: "critical", statusClass: "critical", status: "当日必清", formula: "剩余交接天数 = 0", foot: "2 项即将到期", action: "去处理", urgency: "需今日处理", focusTone: "danger", statusMode: "today" },
     { type: "renew", key: "renewToday", label: "续签", sourceClass: "source-customer", sourceLabel: "客户管理", cardClass: "critical", statusClass: "critical", status: "当日必清", formula: "主合同到期日 = 今日", foot: "已续签实时剔除", action: "提醒销售", urgency: "需今日处理", focusTone: "danger", statusMode: "today" },
-    { type: "visit", key: "visitToday", label: "拜访", sourceClass: "source-visit", sourceLabel: "拜访跟进", cardClass: "", statusClass: "neutral", status: "今日待办", formula: "创建 + 1 个工作日 17:00", foot: "周末任务周一补做", action: "去反馈", urgency: "需今日处理", focusTone: "danger", statusMode: "today" },
-    { type: "approval", key: "approvalToday", label: "审批", sourceClass: "source-visit", sourceLabel: "拜访跟进", cardClass: "", statusClass: "neutral", status: "待审批", formula: "提交后 24 小时内未审批", foot: "通过或驳回后剔除", action: "去审批", urgency: "需今日处理", focusTone: "danger", statusMode: "today" }
+    { type: "visit", key: "visitToday", label: "拜访", sourceClass: "source-visit", sourceLabel: "拜访跟进", cardClass: "", statusClass: "neutral", status: "今日待办", formula: "流失减量 17:00 · 常规按计划时间", foot: "两类拜访分别判断时效", action: "去反馈", urgency: "需今日处理", focusTone: "danger", statusMode: "today", segments: [{ key: "visitLossToday", label: "流失减量" }, { key: "visitRegularToday", label: "常规拜访" }] },
+    { type: "warehouse", key: "warehouseTask", label: "搬仓", sourceClass: "source-routine", sourceLabel: "常规任务", cardClass: "routine-alert", statusClass: "neutral", status: "今日待办", formula: "任务接收后 7 天内", foot: "仅统计未完成任务", action: "查看任务", urgency: "需今日处理", focusTone: "warning", statusMode: "deadline" },
+    { type: "tc-exception", key: "tcExceptionToday", label: "TC 入库异常", sourceClass: "source-routine", sourceLabel: "常规任务", cardClass: "warning", statusClass: "warning", status: "异常待清", formula: "创建后 7 天内", foot: "完成后实时剔除", action: "去处理", urgency: "需今日处理", focusTone: "warning", statusMode: "deadline" },
+    { type: "blocked", key: "blockedTask", label: "异常卡单", sourceClass: "source-routine", sourceLabel: "常规任务", cardClass: "warning", statusClass: "warning", status: "异常待清", formula: "创建后 1 天内", foot: "关闭后实时剔除", action: "查看进度", urgency: "需今日处理", focusTone: "warning" },
+    { type: "accident", key: "accidentWarningToday", label: "一级事故预警", sourceClass: "source-routine", sourceLabel: "体验预警", cardClass: "overdue", statusClass: "high-risk", status: "高优先级", formula: "系统推送后 48 小时内", foot: "闭环后实时剔除", action: "去跟进", urgency: "需立即处理", focusTone: "danger", statusMode: "today" }
   ],
   overdue: [
     { type: "handover", key: "handoverOvertime", label: "交接", sourceClass: "source-customer", sourceLabel: "客户管理", cardClass: "overdue", statusClass: "overdue", status: "已超时", formula: "交接时长 > 90 天", foot: "永久保留至闭环", action: "查看明细", urgency: "需立即处理", focusTone: "danger" },
     { type: "renew", key: "renewOvertime", label: "续签", sourceClass: "source-customer", sourceLabel: "客户管理", cardClass: "overdue renew-overdue", statusClass: "orange-red", status: "已超时", formula: "已过期且过期天数 ≤ 60", foot: "超过 60 天不计入", action: "立即跟进", urgency: "需立即处理", focusTone: "danger" },
-    { type: "visit", key: "visitOvertime", label: "拜访", sourceClass: "source-visit", sourceLabel: "拜访跟进", cardClass: "overdue", statusClass: "overdue", status: "已超时", formula: "晚于创建 + 1 个工作日 17:00", foot: "已作废任务不统计", action: "立即处理", urgency: "需立即处理", focusTone: "danger" },
+    { type: "visit", key: "visitOvertime", label: "拜访", sourceClass: "source-visit", sourceLabel: "拜访跟进", cardClass: "overdue", statusClass: "overdue", status: "已超时", formula: "超过 17:00 / 计划拜访时间", foot: "已完成、已作废任务剔除", action: "立即处理", urgency: "需立即处理", focusTone: "danger", segments: [{ key: "visitLossOvertime", label: "流失减量" }, { key: "visitRegularOvertime", label: "常规拜访" }] },
     { type: "approval", key: "approvalOvertime", label: "审批", sourceClass: "source-visit", sourceLabel: "拜访跟进", cardClass: "overdue", statusClass: "overdue", status: "已超时", formula: "反馈提交时长 > 24 小时", foot: "超时时长精确到小时", action: "立即催办", urgency: "需立即处理", focusTone: "danger" }
   ],
   later: [
@@ -423,11 +577,8 @@ function syncTaskTabCounts() {
 
   const priorityCount = document.getElementById("priorityCount");
   if (priorityCount) {
-    const priorityViews = ["overdue", "exception"];
-    const total = priorityViews.reduce(function (sum, view) {
-      return sum + taskViews[view].reduce(function (viewSum, config) {
-        return viewSum + alertDetails[config.key].count;
-      }, 0);
+    const total = taskViews.today.reduce(function (sum, config) {
+      return sum + alertDetails[config.key].count;
     }, 0);
     priorityCount.textContent = total + " 项";
   }
@@ -481,20 +632,57 @@ function renderFocusPanel(key, elements, options) {
 
 function buildStageCardMarkup(config, isActive) {
   const detail = alertDetails[config.key];
-  const cardClasses = ["stage-card", config.sourceClass, config.cardClass, isActive ? "active" : ""].filter(Boolean).join(" ");
+  const cardClasses = ["stage-card", config.sourceClass, config.cardClass, config.segments ? "has-segments" : "", isActive ? "active" : ""].filter(Boolean).join(" ");
+  const segmentMarkup = config.segments ? '<div class="stage-breakdown" aria-label="拜访类型拆分">' + config.segments.map(function (segment) {
+    const segmentDetail = alertDetails[segment.key];
+    return '<span><i>' + escapeHtml(segment.label) + '</i><b>' + segmentDetail.count + '</b></span>';
+  }).join("") + '</div>' : "";
   return '<article class="' + cardClasses + '" data-key="' + escapeHtml(config.key) + '" data-type="' + escapeHtml(config.type) + '" tabindex="0" role="option" aria-selected="' + (isActive ? "true" : "false") + '">' +
     '<div class="stage-ribbon">' + escapeHtml(config.label) + '</div>' +
     '<span class="metric-status ' + escapeHtml(config.statusClass) + '">' + escapeHtml(config.status) + '</span>' +
     '<div class="stage-metric"><span>' + escapeHtml(detail.title) + ' <svg><use href="#i-info"></use></svg></span><strong class="metric-count">' + detail.count + '</strong></div>' +
     '<p class="metric-formula">' + escapeHtml(config.formula) + '</p>' +
+    segmentMarkup +
     '<div class="metric-card-foot"><span class="metric-source"><i></i>' + escapeHtml(config.sourceLabel) + '<em>·</em>' + escapeHtml(config.foot) + '</span><button class="open-detail" type="button">' + escapeHtml(config.action) + '</button></div>' +
     '</article>';
 }
 
+function renderVisitFocus(config, selectedKey) {
+  const aggregateDetail = alertDetails[config.key];
+  const activeKey = selectedKey || activeVisitSegments[config.key] || config.key;
+  const selectedDetail = alertDetails[activeKey] || aggregateDetail;
+  activeVisitSegments[config.key] = activeKey;
+  activeFocusKey = activeKey;
+
+  renderFocusPanel(activeKey, { title: focusTitle, rule: focusRule, list: focusList, allButton: focusAllButton }, {
+    detail: selectedDetail,
+    urgency: config.urgency,
+    tone: config.focusTone,
+    statusMode: config.statusMode || "",
+    prefix: function (item) { return item.visitKind || "拜访"; },
+    itemKey: function (item) { return item.detailKey || activeKey; }
+  });
+
+  const segmentButtons = [{ key: config.key, label: "全部", count: aggregateDetail.count }].concat(config.segments.map(function (segment) {
+    return { key: segment.key, label: segment.label, count: alertDetails[segment.key].count };
+  }));
+  focusList.insertAdjacentHTML("afterbegin", '<div class="focus-segments" role="tablist" aria-label="拜访类型筛选">' + segmentButtons.map(function (segment) {
+    return '<button class="' + (segment.key === activeKey ? "active" : "") + '" type="button" role="tab" aria-selected="' + (segment.key === activeKey ? "true" : "false") + '" data-visit-segment="' + escapeHtml(segment.key) + '"><span>' + escapeHtml(segment.label) + '</span><b>' + segment.count + '</b></button>';
+  }).join("") + '</div>');
+
+  focusList.querySelectorAll("[data-visit-segment]").forEach(function (button) {
+    button.addEventListener("click", function () { renderVisitFocus(config, button.dataset.visitSegment); });
+  });
+}
+
 function renderTaskFocus(config) {
-  activeFocusKey = config.key;
   taskBoard.classList.remove("active-source-customer", "active-source-visit", "active-source-routine");
   taskBoard.classList.add("active-" + config.sourceClass);
+  if (config.segments) {
+    renderVisitFocus(config, config.key);
+    return;
+  }
+  activeFocusKey = config.key;
   renderFocusPanel(config.key, { title: focusTitle, rule: focusRule, list: focusList, allButton: focusAllButton }, {
     urgency: config.urgency,
     tone: config.focusTone,
@@ -545,7 +733,7 @@ function renderTaskCards(view, preferredType) {
   }
   activeTaskType = selected.type;
 
-  taskCardStrip.classList.remove("card-count-1", "card-count-2", "card-count-4");
+  taskCardStrip.classList.remove("card-count-1", "card-count-2", "card-count-4", "card-count-7");
   taskCardStrip.classList.add("card-count-" + configs.length);
   taskCardStrip.innerHTML = configs.map(function (config) {
     return buildStageCardMarkup(config, config.key === selected.key);
@@ -553,6 +741,11 @@ function renderTaskCards(view, preferredType) {
 
   bindTaskCardEvents(configs);
   renderTaskFocus(selected);
+  requestAnimationFrame(function () {
+    const selectedCard = taskCardStrip.querySelector('[data-key="' + selected.key + '"]');
+    if (!selectedCard || taskCardStrip.scrollWidth <= taskCardStrip.clientWidth) return;
+    taskCardStrip.scrollLeft = Math.max(0, selectedCard.offsetLeft - (taskCardStrip.clientWidth - selectedCard.offsetWidth) / 2);
+  });
 }
 
 function makeCompletedItems(detail) {
@@ -603,7 +796,8 @@ function renderDrawer(key, completed) {
     const toneClass = completed ? "success" : (item.tagTone || "neutral");
     const itemButtons = '<div class="drawer-item-actions">' + (detail.secondaryItemAction ? '<button class="secondary" type="button" data-item-secondary="' + index + '">' + escapeHtml(detail.secondaryItemAction) + '</button>' : '') + '<button type="button" data-item-action="' + index + '">' + escapeHtml(detail.itemAction) + '</button></div>';
     const action = completed ? '<span>处理人：王晨</span>' : itemButtons;
-    return '<article class="drawer-item"><div class="drawer-item-head"><strong>' + escapeHtml(item.title) + '</strong><em class="' + toneClass + '">' + escapeHtml(item.tag) + '</em></div><p>' + escapeHtml(item.description) + '</p>' + renderItemFields(item.fields) + '<div class="drawer-item-meta"><span><svg><use href="#i-clock"></use></svg>' + escapeHtml(item.time) + '</span>' + action + '</div></article>';
+    const itemTitle = item.visitKind ? "【" + item.visitKind + "】" + item.title : item.title;
+    return '<article class="drawer-item"><div class="drawer-item-head"><strong>' + escapeHtml(itemTitle) + '</strong><em class="' + toneClass + '">' + escapeHtml(item.tag) + '</em></div><p>' + escapeHtml(item.description) + '</p>' + renderItemFields(item.fields) + '<div class="drawer-item-meta"><span><svg><use href="#i-clock"></use></svg>' + escapeHtml(item.time) + '</span>' + action + '</div></article>';
   }).join("");
 
   document.querySelectorAll("[data-item-action]").forEach(function (button) {
@@ -655,9 +849,15 @@ function syncMetricCounts() {
 const pageParams = new URLSearchParams(window.location.search);
 const emptyDemoKey = pageParams.get("empty");
 if (emptyDemoKey && alertDetails[emptyDemoKey]) {
-  alertDetails[emptyDemoKey].count = 0;
-  alertDetails[emptyDemoKey].items = [];
-  alertDetails[emptyDemoKey].deadline = "暂无";
+  const emptyKeys = emptyDemoKey === "visitToday"
+    ? ["visitLossToday", "visitRegularToday"]
+    : (emptyDemoKey === "visitOvertime" ? ["visitLossOvertime", "visitRegularOvertime"] : [emptyDemoKey]);
+  emptyKeys.forEach(function (key) {
+    alertDetails[key].count = 0;
+    alertDetails[key].items = [];
+    alertDetails[key].deadline = "暂无";
+  });
+  if (emptyKeys.some(function (key) { return key.indexOf("visit") === 0; })) syncVisitAggregates();
 }
 
 document.querySelectorAll(".mode-tabs button").forEach(function (button) {
@@ -672,7 +872,10 @@ document.getElementById("refreshButton").addEventListener("click", function () {
   const button = this;
   button.classList.add("spinning");
   setTimeout(function () { button.classList.remove("spinning"); }, 700);
-  document.getElementById("updateTime").textContent = "2026-09-23 " + new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const now = new Date();
+  const date = now.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }).replaceAll("/", "-");
+  const time = now.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false });
+  document.getElementById("updateTime").textContent = date + " " + time;
   showToast("数据已刷新");
 });
 
